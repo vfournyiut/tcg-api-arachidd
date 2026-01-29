@@ -64,7 +64,7 @@ model Deck {
 model DeckCard {
   id Int @id @default(autoincrement())
   deckId Int
-  deck Deck @relation(fields: [deckId], references: [id])
   cardId Int
-  card Card @relation(fields: [cardId], references: [id])
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
