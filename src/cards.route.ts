@@ -3,7 +3,7 @@ import {prisma} from "./database";
 
 export const cardsRouter = Router()
 
-cardsRouter.get('/', async (req: Request, res: Response) => {
+cardsRouter.get('/', async (_req: Request, res: Response) => {
     try {
         const cards = await prisma.card.findMany({orderBy: {pokedexNumber: 'asc'}})
         res.status(200).json(cards)
