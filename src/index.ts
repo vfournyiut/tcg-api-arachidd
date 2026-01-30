@@ -2,6 +2,8 @@ import {createServer} from "http";
 import {env} from "./env";
 import express from "express";
 import cors from "cors";
+import {authRouter} from "./auth.route";
+import { cardsRouter } from "./cards.route";
 
 // Create Express app
 export const app = express();
@@ -18,6 +20,10 @@ app.use(express.json());
 
 // Serve static files (Socket.io test client)
 app.use(express.static('public'));
+
+app.use('/api/auth', authRouter);
+
+app.use('/api/cards', cardsRouter);
 
 // Health check endpoint
 app.get("/api/health", (_req, res) => {

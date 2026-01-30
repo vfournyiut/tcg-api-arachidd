@@ -8,9 +8,6 @@ import {PokemonType} from "../src/generated/prisma/enums";
 async function main() {
     console.log("🌱 Starting database seed...");
 
-    await prisma.card.deleteMany();
-    await prisma.user.deleteMany();
-
     const hashedPassword = await bcrypt.hash("password123", 10);
 
     await prisma.user.createMany({
@@ -55,6 +52,80 @@ async function main() {
             })
         )
     );
+
+    const getRandomCards = async (count: number = 10) => {
+        const totalCards = await prisma.card.count();
+        
+        const randomIndices = new Set<number>();
+        while (randomIndices.size < count) {
+            randomIndices.add(Math.floor(Math.random() * totalCards));
+        }
+        console.log(randomIndices);
+        
+        const cards = [];
+        for (const index of randomIndices) {
+            const card = await prisma.card.findFirst({
+                skip: index,
+                take: 1
+            });
+            if (card) {
+                cards.push(card);
+            }
+        }
+        
+        return cards;
+    }
+
+    // const createStartDeck = await prisma.deck.createMany({
+    //     data: [
+    //         {
+    //             name: "Starter Deck Blue",
+    //             userId: blueUser.id,
+    //             deckCards: {
+    //                 create: (await getRandomCards(10)).map(card => ({
+    //                     cardId: card.id
+    //                 }))
+    //             }
+    //         }, 
+    //         {
+    //             name: "Starter Deck Red",
+    //             userId: redUser.id,
+    //             deckCards: {
+    //                 create: (await getRandomCards(10)).map(card => ({
+    //                     cardId: card.id
+    //                 }))
+    //             }
+    //         }
+    //     ]
+    // });
+
+    const StarterDeckBlue = await prisma.deck.create({
+        data: {
+            name: "Starter Deck Blue",
+            userId: blueUser.id,
+            deckCards: {
+                create: (await getRandomCards(10)).map(card => ({
+                    cardId: card.id
+                }))
+            }
+        },
+    });
+
+    console.log(`✅ Created Starter Deck Blue with 10 cards`);
+
+    const StarterDeckRed = await prisma.deck.create({
+        data: {
+            name: "Starter Deck Red",
+            userId: redUser.id,
+            deckCards: {
+                create: (await getRandomCards(10)).map(card => ({
+                    cardId: card.id
+                }))
+            }
+        },
+    });
+
+    console.log(`✅ Created Starter Deck Red with 10 cards`);
 
     console.log(`✅ Created ${pokemonData.length} Pokemon cards`);
 
