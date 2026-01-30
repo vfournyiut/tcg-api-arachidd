@@ -2,8 +2,8 @@ import {createServer} from "http";
 import {env} from "./env";
 import express from "express";
 import cors from "cors";
-import {authRouter} from "./auth.route";
-import { cardsRouter } from "./cards.route";
+import {authRouter} from "./routes/auth.route";
+import { cardsRouter } from "./routes/cards.route";
 
 // Create Express app
 export const app = express();
