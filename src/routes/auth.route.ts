@@ -1,13 +1,14 @@
-import {Request, Response, Router} from 'express'
+import {Response, Router} from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import {prisma} from "./database";
+import {prisma} from "../database";
+import { SignUpRequest, SignInRequest } from '../types/auth.types';
 
 export const authRouter = Router()
 
 
 // SIGN UP
-authRouter.post('/sign-up', async (req: Request, res: Response) => {
+authRouter.post('/sign-up', async (req: SignUpRequest, res: Response) => {
     const {username, email, password} = req.body
     try {
         // Vérifier si l'utilisateur existe déjà
@@ -65,7 +66,7 @@ authRouter.post('/sign-up', async (req: Request, res: Response) => {
 })
 
 // SIGN IN
-authRouter.post('/sign-in', async (req: Request, res: Response) => {
+authRouter.post('/sign-in', async (req: SignInRequest, res: Response) => {
     const {email, password} = req.body
 
     try {
