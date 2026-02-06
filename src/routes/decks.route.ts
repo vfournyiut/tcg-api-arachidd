@@ -5,7 +5,7 @@ import "../types/express";
 
 export const decksRouter = Router()
 
-decksRouter.post('/', authenticateToken, async (req, res) => {
+decksRouter.post('/', authenticateToken, async (req : Request, res : Response) => {
     try {
         const { name, cards } = req.body
         const userId = req.user?.userId
@@ -43,14 +43,14 @@ decksRouter.post('/', authenticateToken, async (req, res) => {
             }
         })
 
-        res.status(201).json(newDeck)
+        return res.status(201).json(newDeck)
 
     } catch (error) {
-        res.status(500).json({ error: 'Erreur serveur' })
+        return res.status(500).json({ error: 'Erreur serveur' })
     }
 })
 
-decksRouter.get('/mine', authenticateToken, async (req, res) => {
+decksRouter.get('/mine', authenticateToken, async (req : Request, res : Response) => {
     try {
         const userId = req.user?.userId
         const existingDecks = await prisma.deck.findMany({
@@ -64,14 +64,14 @@ decksRouter.get('/mine', authenticateToken, async (req, res) => {
             }
         })
 
-        res.status(200).json(existingDecks)
+        return res.status(200).json(existingDecks)
 
     } catch (error) {
-        res.status(500).json({ error: 'Erreur serveur' })
+        return res.status(500).json({ error: 'Erreur serveur' })
     }
 })
 
-decksRouter.get('/:id', authenticateToken, async (req, res) => {
+decksRouter.get('/:id', authenticateToken, async (req : Request, res : Response) => {
     try {
         const deckId = parseInt(req.params.id)
         const userId = req.user?.userId
@@ -94,14 +94,14 @@ decksRouter.get('/:id', authenticateToken, async (req, res) => {
             return res.status(403).json({ error: 'Accès refusé à ce deck' })
         }
 
-        res.status(200).json(deck)
+        return res.status(200).json(deck)
 
     } catch (error) {
-        res.status(500).json({ error: 'Erreur serveur' })
+        return res.status(500).json({ error: 'Erreur serveur' })
     }
 })
 
-decksRouter.patch('/:id', authenticateToken, async (req, res) => {
+decksRouter.patch('/:id', authenticateToken, async (req : Request, res : Response) => {
     try {
         const deckId = parseInt(req.params.id)
         const userId = req.user?.userId
@@ -136,31 +136,24 @@ decksRouter.patch('/:id', authenticateToken, async (req, res) => {
         const updatedDeck = await prisma.deck.update({
             where: { id: deckId },
             data: {
-                name: name || deck.name,
-                ...(cards && {
-                    deckCards: {
-                        deleteMany: {},
-                        create: cards.map((cardId) => ({ cardId: cardId }))
-                    }
-                })
-            },
-            include: {
+                name: name,
                 deckCards: {
-                    include: {
-                        card: true
-                    }
+                    deleteMany: {
+                        deckId: deckId,
+                    },
+                    create: cards.map((cardId : number) => ({ cardId: cardId }))
                 }
             }
-        })
+        });
 
-        res.status(200).json(updatedDeck)
+        return res.status(200).json(updatedDeck)
 
     } catch (error) {
-        res.status(500).json({ error: 'Erreur serveur' })
+        return res.status(500).json({ error: 'Erreur serveur' })
     }
-})
+});
 
-decksRouter.delete('/:id', authenticateToken, async (req, res) => {
+decksRouter.delete('/:id', authenticateToken, async (req : Request, res : Response) => {
     try {
         const deckId = parseInt(req.params.id)
         const userId = req.user?.userId
@@ -181,9 +174,9 @@ decksRouter.delete('/:id', authenticateToken, async (req, res) => {
             where: { id: deckId }
         })
 
-        res.status(200).json({ message: 'Deck supprimé avec succès' })
+        return res.status(200).json({ message: 'Deck supprimé avec succès' })
 
     } catch (error) {
-        res.status(500).json({ error: 'Erreur serveur' })
+        return res.status(500).json({ error: 'Erreur serveur' })
     }
 })
