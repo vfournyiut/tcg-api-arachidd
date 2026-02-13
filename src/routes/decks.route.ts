@@ -1,29 +1,28 @@
 import { Request, Response, Router } from "express";
-import {prisma} from "../database";
+import { prisma } from "../database";
 import { authenticateToken } from "../middleware/auth.middleware";
-import "../types/express";
 
 export const decksRouter = Router()
 
-decksRouter.post('/', authenticateToken, async (req : Request, res : Response) => {
+decksRouter.post('/', authenticateToken, async (req: Request, res: Response) => {
     try {
         const { name, cards } = req.body
         const userId = req.user?.userId
 
         if (!name) {
-            return res.status(400).json({error: 'Le nom du deck est requis'})
+            return res.status(400).json({ error: 'Le nom du deck est requis' })
         }
 
         if (!cards || !Array.isArray(cards) || cards.length !== 10) {
-            return res.status(400).json({error: 'Le deck doit contenir 10 cartes'})
+            return res.status(400).json({ error: 'Le deck doit contenir 10 cartes' })
         }
 
         const existingCards = await prisma.card.findMany({
-            where:{id: {in: cards}}
+            where: { id: { in: cards } }
         })
 
         if (existingCards.length !== 10) {
-            return res.status(400).json({error: 'Toutes les cartes doivent exister en base'})
+            return res.status(400).json({ error: 'Toutes les cartes doivent exister en base' })
         }
 
         const newDeck = await prisma.deck.create({
@@ -46,15 +45,16 @@ decksRouter.post('/', authenticateToken, async (req : Request, res : Response) =
         return res.status(201).json(newDeck)
 
     } catch (error) {
+        console.log(error)
         return res.status(500).json({ error: 'Erreur serveur' })
     }
 })
 
-decksRouter.get('/mine', authenticateToken, async (req : Request, res : Response) => {
+decksRouter.get('/mine', authenticateToken, async (req: Request, res: Response) => {
     try {
         const userId = req.user?.userId
         const existingDecks = await prisma.deck.findMany({
-            where: {userId: userId!},
+            where: { userId: userId! },
             include: {
                 deckCards: {
                     include: {
@@ -71,12 +71,12 @@ decksRouter.get('/mine', authenticateToken, async (req : Request, res : Response
     }
 })
 
-decksRouter.get('/:id', authenticateToken, async (req : Request, res : Response) => {
+decksRouter.get('/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
         const deckId = parseInt(req.params.id)
         const userId = req.user?.userId
         const deck = await prisma.deck.findUnique({
-            where: {id: deckId},
+            where: { id: deckId },
             include: {
                 deckCards: {
                     include: {
@@ -101,7 +101,7 @@ decksRouter.get('/:id', authenticateToken, async (req : Request, res : Response)
     }
 })
 
-decksRouter.patch('/:id', authenticateToken, async (req : Request, res : Response) => {
+decksRouter.patch('/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
         const deckId = parseInt(req.params.id)
         const userId = req.user?.userId
@@ -133,17 +133,22 @@ decksRouter.patch('/:id', authenticateToken, async (req : Request, res : Respons
             }
         }
 
+        const updateData: any = {
+            name: name
+        };
+
+        if (cards) {
+            updateData.deckCards = {
+                deleteMany: {
+                    deckId: deckId,
+                },
+                create: cards.map((cardId: number) => ({ cardId: cardId }))
+            };
+        }
+
         const updatedDeck = await prisma.deck.update({
             where: { id: deckId },
-            data: {
-                name: name,
-                deckCards: {
-                    deleteMany: {
-                        deckId: deckId,
-                    },
-                    create: cards.map((cardId : number) => ({ cardId: cardId }))
-                }
-            }
+            data: updateData
         });
 
         return res.status(200).json(updatedDeck)
@@ -153,7 +158,7 @@ decksRouter.patch('/:id', authenticateToken, async (req : Request, res : Respons
     }
 });
 
-decksRouter.delete('/:id', authenticateToken, async (req : Request, res : Response) => {
+decksRouter.delete('/:id', authenticateToken, async (req: Request, res: Response) => {
     try {
         const deckId = parseInt(req.params.id)
         const userId = req.user?.userId
