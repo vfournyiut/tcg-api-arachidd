@@ -1,7 +1,8 @@
-import {createServer} from "http";
-import {env} from "./env";
-import express from "express";
 import cors from "cors";
+import express from "express";
+import {createServer} from "http";
+
+import {env} from "./env";
 import {authRouter} from "./routes/auth.route";
 import { cardsRouter } from "./routes/cards.route";
 import { decksRouter } from "./routes/decks.route";
