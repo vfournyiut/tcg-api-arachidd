@@ -1,0 +1,60 @@
+paths:
+  /cards:
+    get:
+      tags:
+        - Cards
+      summary: Obtenir la liste de toutes les cartes Pokemon
+      description: |
+        Retourne la liste complète de toutes les cartes Pokemon disponibles dans la base de données.
+        Les cartes sont triées par numéro de Pokedex (ordre croissant).
+        Cet endpoint est public et ne nécessite pas d'authentification.
+      operationId: getAllCards
+      responses:
+        '200':
+          description: Liste des cartes récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+              examples:
+                success:
+                  value:
+                    - id: 1
+                      name: "Bulbasaur"
+                      hp: 45
+                      attack: 49
+                      type: "Grass"
+                      pokedexNumber: 1
+                      imgUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+                      createdAt: "2024-01-01T12:00:00Z"
+                      updatedAt: "2024-01-01T12:00:00Z"
+                    - id: 4
+                      name: "Charmander"
+                      hp: 39
+                      attack: 52
+                      type: "Fire"
+                      pokedexNumber: 4
+                      imgUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"
+                      createdAt: "2024-01-01T12:00:00Z"
+                      updatedAt: "2024-01-01T12:00:00Z"
+                    - id: 25
+                      name: "Pikachu"
+                      hp: 35
+                      attack: 55
+                      type: "Electric"
+                      pokedexNumber: 25
+                      imgUrl: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+                      createdAt: "2024-01-01T12:00:00Z"
+                      updatedAt: "2024-01-01T12:00:00Z"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                erreurServeur:
+                  value:
+                    error: "Erreur serveur"

@@ -1,0 +1,278 @@
+paths:
+  /decks:
+    post:
+      tags:
+        - Decks
+      summary: Créer un nouveau deck
+      description: |
+        Permet à un utilisateur authentifié de créer un nouveau deck personnalisé.
+        Le deck doit contenir exactement 10 cartes.
+        Toutes les cartes doivent exister dans la base de données.
+        Le deck est automatiquement associé à l'utilisateur connecté.
+      operationId: createDeck
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckRequest'
+            examples:
+              deckFeu:
+                summary: Deck de type Feu
+                value:
+                  name: "Mon deck Feu"
+                  cards: [4, 5, 6, 37, 38, 58, 59, 77, 78, 126]
+      responses:
+        '201':
+          description: Deck créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '400':
+          description: Requête invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nomManquant:
+                  value:
+                    error: "Le nom du deck est requis"
+                nombreCartes:
+                  value:
+                    error: "Le deck doit contenir 10 cartes"
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                tokenManquant:
+                  value:
+                    error: "Token manquant"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /decks/mine:
+    get:
+      tags:
+        - Decks
+      summary: Obtenir tous mes decks
+      description: |
+        Retourne la liste de tous les decks appartenant à l'utilisateur connecté.
+        Chaque deck inclut la liste complète des 10 cartes avec leurs détails.
+      operationId: getMyDecks
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste des decks récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Deck'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /decks/{id}:
+    get:
+      tags:
+        - Decks
+      summary: Obtenir un deck par son ID
+      description: |
+        Retourne les détails d'un deck spécifique appartenant à l'utilisateur connecté.
+        Un utilisateur ne peut consulter que ses propres decks.
+      operationId: getDeckById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du deck à récupérer
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Deck récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                accesRefuse:
+                  value:
+                    error: "Accès refusé à ce deck"
+        '404':
+          description: Deck non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                nonTrouve:
+                  value:
+                    error: "Deck non trouvé"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      tags:
+        - Decks
+      summary: Modifier un deck existant
+      description: |
+        Permet de modifier le nom et/ou les cartes d'un deck existant.
+        Seul le propriétaire du deck peut le modifier.
+        Si cards est fourni, il doit contenir exactement 10 cartes.
+      operationId: updateDeck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du deck à modifier
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckRequest'
+            examples:
+              modifierDeck:
+                summary: Modifier le deck
+                value:
+                  name: "Nouveau nom de deck"
+                  cards: [7, 8, 9, 54, 55, 60, 61, 62, 86, 87]
+      responses:
+        '200':
+          description: Deck modifié avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+        '400':
+          description: Requête invalide
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Deck non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Decks
+      summary: Supprimer un deck
+      description: |
+        Permet de supprimer définitivement un deck existant.
+        Cette action est irréversible.
+        Seul le propriétaire du deck peut le supprimer.
+      operationId: deleteDeck
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID du deck à supprimer
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Deck supprimé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+              examples:
+                success:
+                  value:
+                    message: "Deck supprimé avec succès"
+        '401':
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Accès refusé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Deck non trouvé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

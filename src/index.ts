@@ -1,10 +1,12 @@
-import {createServer} from "http";
-import {env} from "./env";
+import { createServer } from "http";
+import { env } from "./env";
 import express from "express";
 import cors from "cors";
-import {authRouter} from "./routes/auth.route";
+import swaggerUi from "swagger-ui-express";
+import { authRouter } from "./routes/auth.route";
 import { cardsRouter } from "./routes/cards.route";
 import { decksRouter } from "./routes/decks.route";
+import { swaggerSpec, swaggerUiOptions } from "../swagger";
 
 // Create Express app
 export const app = express();
@@ -28,9 +30,12 @@ app.use('/api/cards', cardsRouter);
 
 app.use('/api/decks', decksRouter);
 
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
 // Health check endpoint
 app.get("/api/health", (_req, res) => {
-    res.json({status: "ok", message: "TCG Backend Server is running"});
+    res.json({ status: "ok", message: "TCG Backend Server is running" });
 });
 
 // Start server only if this file is run directly (not imported for tests)
@@ -43,6 +48,7 @@ if (require.main === module) {
     try {
         httpServer.listen(env.PORT, () => {
             console.log(`\n🚀 Server is running on http://localhost:${env.PORT}`);
+            console.log(`📚 Swagger documentation available at http://localhost:${env.PORT}/api-docs`);
             console.log(`🧪 Socket.io Test Client available at http://localhost:${env.PORT}`);
         });
     } catch (error) {

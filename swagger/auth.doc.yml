@@ -1,0 +1,140 @@
+paths:
+  /auth/sign-up:
+    post:
+      tags:
+        - Auth
+      summary: Créer un nouveau compte utilisateur
+      description: |
+        Permet à un nouvel utilisateur de s'inscrire sur la plateforme.
+        Crée un compte utilisateur avec un nom d'utilisateur, une adresse email et un mot de passe.
+        Le mot de passe est automatiquement hashé avant d'être stocké en base de données.
+        Retourne un token JWT qui peut être utilisé immédiatement pour accéder aux endpoints protégés.
+      operationId: signUp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+            examples:
+              exemple1:
+                summary: Inscription standard
+                value:
+                  username: "ash_ketchum"
+                  email: "ash@pokemon.com"
+                  password: "pikachu123"
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  value:
+                    message: "Utilisateur créé avec succès"
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYXNoQHBva2Vtb24uY29tIn0.abcdef"
+                    user:
+                      id: 1
+                      name: "ash_ketchum"
+                      email: "ash@pokemon.com"
+        '400':
+          description: Champs manquants ou invalides
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                champsManquants:
+                  value:
+                    error: "Champs manquants"
+        '409':
+          description: L'utilisateur existe déjà
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                utilisateurExistant:
+                  value:
+                    error: "Utilisateur déjà existant"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                erreurServeur:
+                  value:
+                    error: "Erreur serveur"
+
+  /auth/sign-in:
+    post:
+      tags:
+        - Auth
+      summary: Se connecter à un compte existant
+      description: |
+        Permet à un utilisateur existant de se connecter avec son email et son mot de passe.
+        Vérifie les identifiants et retourne un token JWT valide pendant 7 jours.
+        Ce token doit être inclus dans l'en-tête Authorization avec le format Bearer {token}.
+      operationId: signIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
+            examples:
+              exemple1:
+                summary: Connexion
+                value:
+                  email: "ash@pokemon.com"
+                  password: "pikachu123"
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  value:
+                    message: "Connexion réussie"
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYXNoQHBva2Vtb24uY29tIn0.abcdef"
+                    user:
+                      id: 1
+                      name: "ash_ketchum"
+                      email: "ash@pokemon.com"
+        '400':
+          description: Champs manquants
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                champsManquants:
+                  value:
+                    error: "Champs manquants"
+        '401':
+          description: Email ou mot de passe incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                identifiantsInvalides:
+                  value:
+                    error: "Email ou mot de passe incorrect"
+        '500':
+          description: Erreur serveur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                erreurServeur:
+                  value:
+                    error: "Erreur serveur"

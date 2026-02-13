@@ -1,0 +1,237 @@
+openapi: 3.0.0
+info:
+  title: TCG Pokemon API
+  description: |
+    API pour gérer un jeu de cartes à collectionner (TCG) de type Pokemon.
+    
+    Cette API permet de :
+    - S'authentifier avec JWT
+    - Consulter la liste des cartes Pokemon disponibles
+    - Créer, consulter, modifier et supprimer des decks personnalisés
+    
+    **Authentification:** La plupart des endpoints nécessitent un token JWT Bearer.
+    Utilisez le bouton "Authorize" ci-dessous après vous être connecté.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@tcg-api.com
+
+servers:
+  - url: http://localhost:3001/api
+    description: Serveur de développement local
+
+tags:
+  - name: Auth
+    description: Authentification et gestion des utilisateurs
+  - name: Cards
+    description: Consultation des cartes Pokemon disponibles
+  - name: Decks
+    description: Gestion des decks personnalisés
+  - name: Health
+    description: Vérification de l'état du serveur
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Entrer votre token JWT dans le format: **Bearer {token}**
+        
+        Pour obtenir un token, utilisez l'endpoint `/auth/sign-in` ou `/auth/sign-up`
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "ash_ketchum"
+        email:
+          type: string
+          format: email
+          example: "ash@pokemon.com"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Card:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Bulbasaur"
+        hp:
+          type: integer
+          example: 45
+          minimum: 1
+        attack:
+          type: integer
+          example: 49
+          minimum: 1
+        type:
+          type: string
+          enum: [Normal, Fire, Water, Electric, Grass, Ice, Fighting, Poison, Ground, Flying, Psychic, Bug, Rock, Ghost, Dragon, Dark, Steel, Fairy]
+          example: "Grass"
+        pokedexNumber:
+          type: integer
+          example: 1
+          minimum: 1
+        imgUrl:
+          type: string
+          nullable: true
+          example: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    DeckCard:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        deckId:
+          type: integer
+          example: 1
+        cardId:
+          type: integer
+          example: 25
+        card:
+          $ref: '#/components/schemas/Card'
+
+    Deck:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Mon deck Feu"
+        userId:
+          type: integer
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        deckCards:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeckCard'
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Une erreur est survenue"
+
+    Success:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Opération réussie"
+
+    SignUpRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          example: "ash_ketchum"
+          minLength: 3
+        email:
+          type: string
+          format: email
+          example: "ash@pokemon.com"
+        password:
+          type: string
+          format: password
+          example: "pikachu123"
+          minLength: 6
+
+    SignInRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "ash@pokemon.com"
+        password:
+          type: string
+          format: password
+          example: "pikachu123"
+
+    AuthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Utilisateur créé avec succès"
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: "ash_ketchum"
+            email:
+              type: string
+              example: "ash@pokemon.com"
+
+    DeckRequest:
+      type: object
+      required:
+        - name
+        - cards
+      properties:
+        name:
+          type: string
+          example: "Mon deck Électrique"
+          minLength: 1
+        cards:
+          type: array
+          items:
+            type: integer
+          minItems: 10
+          maxItems: 10
+          example: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "ok"
+        message:
+          type: string
+          example: "TCG Backend Server is running"
