@@ -1,8 +1,9 @@
-import {Response, Router} from 'express'
 import bcrypt from 'bcrypt'
+import {Response, Router} from 'express'
 import jwt from 'jsonwebtoken'
+
 import {prisma} from "../database";
-import { SignUpRequest, SignInRequest } from '../types/auth.types';
+import { SignInRequest,SignUpRequest } from '../types/auth.types';
 
 export const authRouter = Router()
 
