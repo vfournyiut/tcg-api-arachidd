@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response} from 'express'
+import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 
 
@@ -8,27 +8,21 @@ export const authenticateToken = (
     res: Response,
     next: NextFunction,
 ) => {
-    // Récupérer le token depuis l'en-tête Authorization
     const authHeader = req.headers.authorization
-    const token = authHeader && authHeader.split(' ')[1] // Format: "Bearer TOKEN"
+    const token = authHeader && authHeader.split(' ')[1]
 
     if (!token) {
-        return res.status(401).json({error: 'Token manquant'})
+        return res.status(401).json({ error: 'Token manquant' })
     }
 
     try {
-        // Vérifier et décoder le token
         const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
             userId: number
             email: string
         }
-
-        // Ajouter userId à la requête pour l'utiliser dans les routes
         req.user = decoded
-
-        // Passer au prochain middleware ou à la route
         return next()
     } catch (error) {
-        return res.status(401).json({error: 'Token invalide ou expiré'})
+        return res.status(401).json({ error: 'Token invalide ou expiré' })
     }
 }

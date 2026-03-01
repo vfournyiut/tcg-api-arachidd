@@ -1,13 +1,5 @@
-import {PokemonType} from "../generated/prisma/client";
+import { PokemonType } from "../generated/prisma/client";
 
-/**
- * Règles du jeu Pokemon TCG
- * Contient les fonctions pures pour le calcul des dégâts et le système de types
- */
-
-/**
- * Retourne la faiblesse principale d'un type Pokemon
- */
 export function getWeakness(defenderType: PokemonType): PokemonType | null {
     switch (defenderType) {
         case PokemonType.Normal:
@@ -51,23 +43,14 @@ export function getWeakness(defenderType: PokemonType): PokemonType | null {
     }
 }
 
-/**
- * Calcule le multiplicateur de dégâts selon les types
- */
 export function getDamageMultiplier(attackerType: PokemonType, defenderType: PokemonType): number {
     const weakness = getWeakness(defenderType);
-
-    // Si le type de l'attaquant correspond à la faiblesse du défenseur
     if (weakness === attackerType) {
-        return 2.0; // Super efficace (x2 dégâts)
+        return 2.0;
     }
-
-    return 1.0; // Dégâts normaux
+    return 1.0;
 }
 
-/**
- * Calcule les dégâts infligés lors d'une attaque
- */
 export function calculateDamage(
     attackerAttack: number,
     attackerType: PokemonType,

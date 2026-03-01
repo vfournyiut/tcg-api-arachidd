@@ -1,26 +1,25 @@
 import cors from "cors";
 import express from "express";
-import {createServer} from "http";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
-import {env} from "./env";
-import {authRouter} from "./routes/auth.route";
+import { env } from "./env";
+import { authRouter } from "./routes/auth.route";
 import { cardsRouter } from "./routes/cards.route";
 import { decksRouter } from "./routes/decks.route";
+import { authenticateSocket } from "./middleware/socket-auth.middleware";
+import { initializeSocketHandlers } from "./socket/game.socket";
 
-// Create Express app
 export const app = express();
-
-// Middlewares
 app.use(
     cors({
-        origin: true,  // Autorise toutes les origines
+        origin: true,
         credentials: true,
     }),
 );
 
 app.use(express.json());
 
-// Serve static files (Socket.io test client)
 app.use(express.static('public'));
 
 app.use('/api/auth', authRouter);
@@ -29,21 +28,26 @@ app.use('/api/cards', cardsRouter);
 
 app.use('/api/decks', decksRouter);
 
-// Health check endpoint
 app.get("/api/health", (_req, res) => {
-    res.json({status: "ok", message: "TCG Backend Server is running"});
+    res.json({ status: "ok", message: "TCG Backend Server is running" });
 });
 
-// Start server only if this file is run directly (not imported for tests)
 if (require.main === module) {
-    // Create HTTP server
     const httpServer = createServer(app);
+    const io = new Server(httpServer, {
+        cors: {
+            origin: true,
+            credentials: true
+        }
+    });
 
+    io.use(authenticateSocket);
 
-    // Start server
+    initializeSocketHandlers(io);
     try {
         httpServer.listen(env.PORT, () => {
             console.log(`\n🚀 Server is running on http://localhost:${env.PORT}`);
+            console.log(`🎮 Socket.io ready for game connections`);
             console.log(`🧪 Socket.io Test Client available at http://localhost:${env.PORT}`);
         });
     } catch (error) {
